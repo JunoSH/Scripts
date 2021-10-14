@@ -141,7 +141,7 @@ public class SettingScript : MonoBehaviour
     {
         Debug.Log("Œ»İ’lF" + VolumeSlider.value);
     }
-    public void MuteButton()  //09/29 ì¬’†
+    public void MuteButton()  // 10/13ì¬’†
     {
         audiosource.PlayOneShot(sound.PushButton);
         VolumeValue = 0f;

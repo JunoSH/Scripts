@@ -216,8 +216,7 @@ public class Director : MonoBehaviour
                     Answer = j.QuestionAnswer,
                     Sentense = j.QuestionSentenses
                 };
-                Q3.CopyList.Add(q);    //Q2の中身をQ3に全部入れ替える。
-                                        //出題のコードをQ3で構成していれば、Q3の中身を変えるだけであらゆる問題に変更することが出来る
+                Q3.CopyList.Add(q);   
 
             }
         }
@@ -232,9 +231,8 @@ public class Director : MonoBehaviour
                     Answer = j.QuestionAnswer,
                     Sentense = j.QuestionSentenses
                 };
-                Q3.CopyList.Add(q);    //Q2の中身をQ3に全部入れ替える。
-                                        //出題のコードをQ3で構成していれば、Q3の中身を変えるだけであらゆる問題に変更することが出来る
-
+                Q3.CopyList.Add(q);    
+                //if文を使わずに一つでまとめてみる // 10/13
             }
             GameObject QText = GameObject.Find("Sentense");
             Text Alignment = QText.GetComponent<Text>();
