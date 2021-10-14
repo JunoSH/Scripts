@@ -10,6 +10,7 @@ public class Question2 : ScriptableObject
 [System.Serializable]
 public class JewelNameQuiz
 {
+    public int NameQuizID;
     public string JewelNameAnswer;
     public string NameQuestion;
 }

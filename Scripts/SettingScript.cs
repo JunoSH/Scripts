@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using DG.Tweening;
+using UnityEngine.SceneManagement;
+using System.IO;
 
 public class SettingScript : MonoBehaviour
 {
@@ -21,14 +23,41 @@ public class SettingScript : MonoBehaviour
     AudioSource audiosource;
     public static float VolumeValue = 0.5f; //デフォルト
     float VolumeMute;
+
+    public static int ChangeQuiz;
+
+
+    public int m_int;
+
+
+
+
     void Start()
     {
+        Debug.Log(Application.persistentDataPath);
         inputfield.GetComponent<InputField>(); //inputfield = inputfield = GetComponent<InputField>();
         text.GetComponent<Text>();
         settingPanel.SetActive(false);
         audiosource = GetComponent<AudioSource>();
         VolumeSlider.GetComponent<Slider>();
         VolumeSlider.value = VolumeValue;
+
+
+        StreamReader reader;
+
+        reader = new StreamReader(Application.dataPath + "/../savedataall"+".json");
+        //loaddata = reader.ReadToEnd();
+        Director.SavedataALL savedataALL = JsonUtility.FromJson<Director.SavedataALL>(reader.ReadToEnd());
+        //Debug.Log(reader.ReadToEnd());
+        reader.Close();
+        //Debug.Log(reader.ToString());
+        foreach(Director.Savedata s in savedataALL.savedataList)
+        {
+            Debug.Log($"changequizID = {s.changequizID} questionID = {s.QuestionID} SeikaiSu = {s.SeikaiSu} totalcount = {s.totalcount}");
+        }
+        //savedata = JsonUtility.FromJson<Savedata>(loaddata);
+
+
     }
     public void TimeSetting() //OKボタン
     {
@@ -121,6 +150,22 @@ public class SettingScript : MonoBehaviour
     public static float GetVolumeValue()
     {
         return VolumeValue;
+    }
+    public void GoGame()
+    {
+        ChangeQuiz = 0;
+        GetChangeQuiz();
+        SceneManager.LoadScene("QuizHontai");
+    }
+    public void GoGame2()
+    {
+        ChangeQuiz = 1;
+        GetChangeQuiz();
+        SceneManager.LoadScene("QuizHontai");
+    }
+    public static int GetChangeQuiz()
+    {
+        return ChangeQuiz;
     }
 
 }

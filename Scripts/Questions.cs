@@ -14,4 +14,10 @@ public class QS
     public int QuestionID;
     public string QuestionAnswer;   
     public string QuestionSentenses;   
+
+
+
+
 }
+
+

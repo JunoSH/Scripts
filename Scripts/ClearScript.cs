@@ -11,7 +11,6 @@ public class ClearScript : MonoBehaviour
     {
         
         score = Director.GetScore();
-        score = Director2.GetScore2();
         Text scoretext = GameObject.Find("ScorePoint").GetComponent<Text>();
         scoretext.text = "SCORE : " + score + "/10";
 
@@ -33,12 +32,17 @@ public class ClearScript : MonoBehaviour
         {
             Ev.text = "Perfect!";
         }
+
     }
 
     public void GoTitle()
     {
         SceneManager.LoadScene("TITLE");
         score = 0;
+    }
+    public static int GetClearScore()
+    {
+        return score;
     }
 
 }
