@@ -10,10 +10,7 @@ public class Director : MonoBehaviour
 {
     public List<Questions> questions;
 
-
-    //public Questions Q;  
-    //public Question2 Q2;  //問題置き場
-    public CopiedQuestion Q3; //　各ScriptableObjectコピー先
+    public CopiedQuestion copiedquestion; //　各ScriptableObjectコピー先
 
 
     public GameObject seikai;　//　〇イラスト
@@ -31,11 +28,13 @@ public class Director : MonoBehaviour
 
     int Count = 0; //問題切替
     int Qcount = 1;//今何問目か
-    public static int Qn; //問題番号
+    int Qn; //問題番号
     int judge = 0; //判定用
     public static int Score = 0; //最終スコア
     int gameover = 0; //ゲームオーバーまであと何点か
-    public static int lastScore = 0; //前回のスコア
+    public int clearCount = 0;
+
+    //public static int lastScore = 0; //前回のスコア
 
 
     public GameObject PausePanel;  //ポーズボタンで出てくるUI
@@ -47,7 +46,8 @@ public class Director : MonoBehaviour
     List<int> num = new List<int>(); //出題済問題番号
 
     [System.Serializable]
-    public class SavedataALL {
+    public class SavedataALL 
+    {
         public List<Savedata> savedataList = new List<Savedata>();
     }
     private SavedataALL savedataall = new SavedataALL();
@@ -55,10 +55,10 @@ public class Director : MonoBehaviour
     [System.Serializable]
     public class Savedata
     {
-        public int changequizID;
-        public int QuestionID;
-        public int totalcount;
-        public int SeikaiSu;
+        public int changequizID;  //和名当てか歴史・特性か  
+        public int QuestionID;    //問題番号    
+        public int totalcount;    //問題毎の遭遇した回数
+        public int SeikaiSu;    　//正解数
     }
     Savedata savedata = new Savedata();
     // Start is called before the first frame update
@@ -67,7 +67,7 @@ public class Director : MonoBehaviour
         Score = 0;
         countdown = SettingScript.GetTimeLimitSetting();
         countdownReset = SettingScript.GetTimeLimitSetting();
-        if (countdown == 0) //settingせずにスタートする、またはsettingを開いて何も入力されていない場合15秒
+        if (countdown == 0) 
         {
             countdown = 15; //defaultTime
             countdownReset = 15;
@@ -77,9 +77,10 @@ public class Director : MonoBehaviour
         
         int a = SettingScript.GetChangeQuiz();
         MondaiSentaku(a);
-        Qn = Random.Range(0, Q3.CopyList.Count);
+        Qn = Random.Range(0, copiedquestion.CopyList.Count);
         Shutsudai();
         TimeStop = true;
+
 
         //Debug.Log($"Count = {Count} Qcount = {Qcount}");
         audioSource = GetComponent<AudioSource>();
@@ -87,34 +88,37 @@ public class Director : MonoBehaviour
         audioSource.volume = NowVolume;
 
 
-
-        StreamReader reader;
-
-        reader = new StreamReader(Application.dataPath + "/../savedataall" + ".json");
-        //loaddata = reader.ReadToEnd();
-        savedataall = JsonUtility.FromJson<SavedataALL>(reader.ReadToEnd());
-        //Debug.Log(reader.ReadToEnd());
-        reader.Close();
+        clearCount = PlayerPrefs.GetInt(Define.KeyClearCount, 0);
+        Debug.Log("clearCountは"+clearCount);
+        string filePath = Application.dataPath + "/../savedataall" + ".json";
+        if (File.Exists(filePath) == true)
+        {
+            StreamReader reader;
+            reader = new StreamReader(Application.dataPath + "/../savedataall" + ".json");
+            savedataall = JsonUtility.FromJson<SavedataALL>(reader.ReadToEnd());
+            reader.Close();
+        }
     }
 
     // Update is called once per frame
     void Update()
     {
        
-            Text Qnum = GameObject.Find("Number").GetComponent<Text>(); //  今何問目か
-            Qnum.text = Qcount.ToString() + "/10問目";
-            Text Qtext = GameObject.Find("Sentense").GetComponent<Text>();  //問題文
-            Qtext.text = Q3.CopyList[Qn].Sentense;
+        Text Qnum = GameObject.Find("Number").GetComponent<Text>(); //  今何問目か
+        Qnum.text = Qcount.ToString() + "/10問目";
+        Text Qtext = GameObject.Find("Sentense").GetComponent<Text>();  //問題文
+        Qtext.text = copiedquestion.CopyList[Qn].Sentense;
 
-            Text answer1 = GameObject.Find("AT1").GetComponent<Text>(); //左上ボタン
-            answer1.text = Q3.CopyList[bn[0]].Answer;
-            Text answer2 = GameObject.Find("AT2").GetComponent<Text>(); //右上ボタン
-            answer2.text = Q3.CopyList[bn[1]].Answer;
-            Text answer3 = GameObject.Find("AT3").GetComponent<Text>(); //左下ボタン
-            answer3.text = Q3.CopyList[bn[2]].Answer;
-            Text answer4 = GameObject.Find("AT4").GetComponent<Text>(); //右下ボタン
-            answer4.text = Q3.CopyList[bn[3]].Answer;
+        Text answer1 = GameObject.Find("AT1").GetComponent<Text>(); //左上ボタン
+        answer1.text = copiedquestion.CopyList[bn[0]].Answer;
+        Text answer2 = GameObject.Find("AT2").GetComponent<Text>(); //右上ボタン
+        answer2.text = copiedquestion.CopyList[bn[1]].Answer;
+        Text answer3 = GameObject.Find("AT3").GetComponent<Text>(); //左下ボタン
+        answer3.text = copiedquestion.CopyList[bn[2]].Answer;
+        Text answer4 = GameObject.Find("AT4").GetComponent<Text>(); //右下ボタン
+        answer4.text = copiedquestion.CopyList[bn[3]].Answer;
    
+
         if (Count == Qcount)
         {
             Qcount++;
@@ -156,7 +160,7 @@ public class Director : MonoBehaviour
     {
         int changequizID = SettingScript.GetChangeQuiz();
 
-        Debug.Log(judge);
+        //Debug.Log(judge);
         if (TimeOver || Qn != bn[judge])//出題番号と、bnリストの中身が違うのであれば = 不正解の場合
         {
             gameover++;
@@ -184,20 +188,10 @@ public class Director : MonoBehaviour
             if (Qcount == 10) //解答を終えたタイミング且つ、次の問題へ飛ぶ前
             {
                 tsugi.transform.position = new Vector3(0, 10000, 0);
-                C.transform.position = new Vector3(0, 0, 0);　//代わりにクリア画面へと飛ぶ
+                C.transform.position = new Vector3(0, 0, 0); //代わりにクリア画面へと飛ぶ
 
             }
            
-            if(changequizID == 0)
-            {
-                string History = "history";
-                SaveSeikai(History);
-            }
-            else if(changequizID == 1)
-            {
-                string Wamei = "wamei";
-                SaveSeikai(Wamei);
-            }
             Saveseikai(changequizID, Qn , true);
         }
 
@@ -205,41 +199,35 @@ public class Director : MonoBehaviour
 
     public void MondaiSentaku(int n)
     {
-        if (n == 0)
+        copiedquestion.CopyList.Clear();
+        foreach (QS j in questions[n].Qsentenses)
         {
-            Q3.CopyList.Clear();
-            foreach (QS j in questions[n].Qsentenses)
+            Copy q = new Copy
             {
-                Copy q = new Copy
-                {
-                    QuestionID = j.QuestionID,
-                    Answer = j.QuestionAnswer,
-                    Sentense = j.QuestionSentenses
-                };
-                Q3.CopyList.Add(q);   
+                ID = j.QuestionID,
+                Answer = j.QuestionAnswer,
+                Sentense = j.QuestionSentenses
+            };
+            copiedquestion.CopyList.Add(q);    
+        }
+        UnityEditor.EditorUtility.SetDirty(copiedquestion);
 
-            }
-        }
-        if (n == 1)
+        GameObject QText = GameObject.Find("Sentense");
+        Text Alignment = QText.GetComponent<Text>();
+        Alignment.alignment = questions[n].textAnchor;
+        Alignment.fontSize = questions[n].fontsize;
+
+
+        /*
+        switch(n)
         {
-            Q3.CopyList.Clear();
-            foreach (QS j in questions[1].Qsentenses)
-            {
-                Copy q = new Copy
-                {
-                    QuestionID = j.QuestionID,
-                    Answer = j.QuestionAnswer,
-                    Sentense = j.QuestionSentenses
-                };
-                Q3.CopyList.Add(q);    
-                //if文を使わずに一つでまとめてみる // 10/13
-            }
-            GameObject QText = GameObject.Find("Sentense");
-            Text Alignment = QText.GetComponent<Text>();
-            Alignment.alignment = TextAnchor.MiddleCenter;
-            Alignment.fontSize = 58;
+            case 1:
+                
+                Alignment.fontSize = questions[n].fontsize;
+                break;
         }
-        UnityEditor.EditorUtility.SetDirty(Q3);
+        */
+
     }
 
     public void Shutsudai()　//直前の問題文と選択肢を選出
@@ -253,17 +241,15 @@ public class Director : MonoBehaviour
         bn.Clear(); //選択肢全て削除
         while (num.Contains(Qn))  //出題済みリストにQnが含まれている
         {
-            Qn = Random.Range(0, Q3.CopyList.Count);  //numリストに入っているQn以外の数字を取得。これが次の問題となる
-            Debug.Log("選出中" + Qn);
+            Qn = Random.Range(0, copiedquestion.CopyList.Count);  //numリストに入っているQn以外の数字を取得。これが次の問題となる
         }
-            Debug.Log("選出後" + Qn);
 
         num.Add(Qn); //出題した問題の番号を出題済みリストに
         bn.Add(Qn);　//正解を入れて置く
         for (int n = 0; n < 3; n++)
         {
             int tempBn = 0; //仮の変数を作り、その変数で取得できた値がbnリストにあるかどうか判定し、Qnとの重複を避ける
-            do { tempBn = Random.Range(0, Q3.CopyList.Count); }
+            do { tempBn = Random.Range(0, copiedquestion.CopyList.Count); }
             while (bn.Contains(tempBn));
 
             bn.Add(tempBn); //bnの中に答えの番号と間違いの番号３つが入る
@@ -311,6 +297,9 @@ public class Director : MonoBehaviour
 
     public void Clear() //クリア画面呼び出し
     {
+        clearCount ++;
+        PlayerPrefs.SetInt(Define.KeyClearCount, clearCount);
+        //Debug.Log("クリア時のclearCountは" + clearCount);
         SceneManager.LoadScene("Clear");
     }
 
@@ -371,28 +360,8 @@ public class Director : MonoBehaviour
         Time.timeScale = 1f;
     }
 
-    public string GetScoreNameKey()
-    {
-        return "";
-    }
 
 
-
-
-    public void SaveSeikai(string A)
-    {
-        savedata.SeikaiSu = 1;
-
-        StreamWriter writer;
-        string jsonstr = JsonUtility.ToJson(savedata);
-        int SeikaiMondaiBangou = Qn;
-        writer = new StreamWriter(Application.dataPath + "/save" + "JSON"+ A + SeikaiMondaiBangou + ".json", false);
-        writer.Write(jsonstr);
-        writer.Flush();
-        writer.Close();
-
-
-    }
 
     public void Saveseikai(int _changequizID, int _QuestionID , bool isCorrected)
     {
@@ -403,11 +372,27 @@ public class Director : MonoBehaviour
             savedataall.savedataList.Add(d);
         }
         d.totalcount += 1;
-        if(isCorrected == true)
+
+        if (isCorrected == true)
         {
-             d.SeikaiSu += 1;
+            d.SeikaiSu += 1;
+            questions[_changequizID].Qsentenses[_QuestionID].correctcount = d.SeikaiSu;
+            
+            int c = PlayerPrefs.GetInt(Define.KeyClearCount, 0);
+
+            if(clearCount > 0)
+            {
+                float seikaisu = questions[_changequizID].Qsentenses[_QuestionID].correctcount;
+                float s = (c / (float)seikaisu) *100;
+                string seitouritsu = s.ToString("f1");
+                questions[_changequizID].Qsentenses[_QuestionID].percentage = seitouritsu;
+
+                Debug.Log(seitouritsu);
+
+            }
+      
         }
-    
+        UnityEditor.EditorUtility.SetDirty(questions[_changequizID]);
         StreamWriter writer;
         string jsonstr = JsonUtility.ToJson(savedataall);
         int SeikaiMondaiBangou = Qn;
@@ -417,19 +402,7 @@ public class Director : MonoBehaviour
         writer.Close();
     }
 
-    /*
-    public void LoadSeikaisu()
-    {
-        string loaddata = "";
-        StreamReader reader;
+    
 
-        reader = new StreamReader(Application.dataPath + "/save" + "JSON" + "/" + A + "/" + SeikaiMondaiBangou + ".json");
-        loaddata = reader.ReadToEnd();
-        reader.Close();
-
-        savedata = JsonUtility.FromJson<Savedata>(loaddata);
-
-
-    }
-    */
+    
 }

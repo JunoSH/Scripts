@@ -29,7 +29,7 @@ public class SaveData : MonoBehaviour
         savedata.CorrectedQuiz++;
         SeikaiSuText.text = savedata.CorrectedQuiz.ToString();
     }
-
+    /*
     public void SaveSeikai()
     {
         StreamWriter writer;
@@ -60,4 +60,5 @@ public class SaveData : MonoBehaviour
 
 
     }
+    */
 }

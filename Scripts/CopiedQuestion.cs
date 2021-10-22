@@ -12,7 +12,16 @@ public class CopiedQuestion : ScriptableObject
 
 public class Copy
 {
-    public int QuestionID;
+    public int ID;
     public string Answer;
     public string Sentense;
+
+    public float correctCount;
+    public string Copiedpercentage;
+
+    public string nameInTips; //名前   
+    public string wameiInTips;　//和名    
+    public string colorInTips;//色
+    public string productionInTips;//産地
+    public string MHinTips; //モース硬度Mohs hardness
 }

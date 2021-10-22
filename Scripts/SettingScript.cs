@@ -22,7 +22,6 @@ public class SettingScript : MonoBehaviour
 
     AudioSource audiosource;
     public static float VolumeValue = 0.5f; //デフォルト
-    float VolumeMute;
 
     public static int ChangeQuiz;
 
@@ -43,20 +42,16 @@ public class SettingScript : MonoBehaviour
         VolumeSlider.value = VolumeValue;
 
 
+        /*
         StreamReader reader;
-
         reader = new StreamReader(Application.dataPath + "/../savedataall"+".json");
-        //loaddata = reader.ReadToEnd();
         Director.SavedataALL savedataALL = JsonUtility.FromJson<Director.SavedataALL>(reader.ReadToEnd());
-        //Debug.Log(reader.ReadToEnd());
         reader.Close();
-        //Debug.Log(reader.ToString());
         foreach(Director.Savedata s in savedataALL.savedataList)
         {
             Debug.Log($"changequizID = {s.changequizID} questionID = {s.QuestionID} SeikaiSu = {s.SeikaiSu} totalcount = {s.totalcount}");
         }
-        //savedata = JsonUtility.FromJson<Savedata>(loaddata);
-
+        */
 
     }
     public void TimeSetting() //OKボタン
@@ -141,7 +136,7 @@ public class SettingScript : MonoBehaviour
     {
         Debug.Log("現在値：" + VolumeSlider.value);
     }
-    public void MuteButton()  // 10/13作成中
+    public void MuteButton()  //09/29 作成中
     {
         audiosource.PlayOneShot(sound.PushButton);
         VolumeValue = 0f;
@@ -151,15 +146,15 @@ public class SettingScript : MonoBehaviour
     {
         return VolumeValue;
     }
-    public void GoGame()
+    public void GoGame(int n)
     {
-        ChangeQuiz = 0;
+        ChangeQuiz = n;
         GetChangeQuiz();
         SceneManager.LoadScene("QuizHontai");
     }
-    public void GoGame2()
+    public void GoGame2(int n)
     {
-        ChangeQuiz = 1;
+        ChangeQuiz = n;
         GetChangeQuiz();
         SceneManager.LoadScene("QuizHontai");
     }
