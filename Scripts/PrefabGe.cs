@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -7,25 +8,24 @@ using UnityEngine.UI;
 public class PrefabGe : MonoBehaviour
 {
     public List<Questions> prefabButtonList;
-    public CopiedQuestion copiedButton;
     [SerializeField] GameObject canvas;
     [SerializeField] GameObject prefabSource;
-    private int selectingChangeQuizID;
+    public int selectingChangeQuizID;
     [SerializeField] Stonedatas stonedatas;
 
-
+    Director.SavedataALL saveDataAll = new Director.SavedataALL();
     // Start is called before the first frame update
-    void Start()
+    public void Start()
     {
+        
         Debug.Log(stonedatas);
     }
 
-
+    
     public void ChooseDetail(int n)
-    {
-        selectingChangeQuizID = n;
-        copiedButton.CopyList.Clear();
-
+    {       
+        //copiedButton.CopyList.Clear();
+        /*
         foreach (QS qs in prefabButtonList[n].Qsentenses)
         {
             Copy list = new Copy
@@ -46,68 +46,73 @@ public class PrefabGe : MonoBehaviour
             copiedButton.CopyList.Add(list);
         }
         UnityEditor.EditorUtility.SetDirty(copiedButton);
+        */
     }
-
-
+    
     public void HistoryCharacteristicDetail(int a)
     {
-        ChooseDetail(a);
-        int n = copiedButton.CopyList.Count;
-        Debug.Log("copiedListの中身は" + n +"個です");
-
+        selectingChangeQuizID = a;
+        int n = prefabButtonList[selectingChangeQuizID].Qsentenses.Count;
         for (int i = 0; i < n; i++)
         {
             GameObject PF = Instantiate(prefabSource);
             PF.transform.SetParent(GameObject.Find("JewelContent").transform, false);
             PF.name = i.ToString();
             Text PFname = PF.transform.GetChild(0).GetComponent<Text>();
-            PFname.text = copiedButton.CopyList[i].Answer;
+            PFname.text = prefabButtonList[selectingChangeQuizID].Qsentenses[i].QuestionAnswer;
             
         }
         
     }
-    /*
-    public void PlayRekishiTokusei()
+    public void loaddata()
     {
-        for (int i = 0; i < 3; i++)
+        string filePath = Application.dataPath + "/../savedataall" + ".json";
+        if (File.Exists(filePath) == true)
         {
-            GameObject PF = Instantiate(PrefabButton.PrefabBtn);
-            PF.transform.SetParent(GameObject.Find("JewelContent").transform, false);
-            PF.name = i.ToString();
-            Text PFname = PF.transform.GetChild(0).GetComponent<Text>();
-            PFname.text = dd.JewelStatusList[i].Name;
+            StreamReader reader;
+            reader = new StreamReader(Application.dataPath + "/../savedataall" + ".json");
+            saveDataAll = JsonUtility.FromJson<Director.SavedataALL>(reader.ReadToEnd());
+            reader.Close();
         }
+
     }
-    */
     public void push(Button sender)
     {
-        int ID = int.Parse(sender.name);
-        int stoneiD = prefabButtonList[selectingChangeQuizID].Qsentenses[ID].stoneid;
+        loaddata();
+        int ID = int.Parse(sender.name);  //ボタンの名前を0からの数字にしている
+        int _stoneiD = prefabButtonList[selectingChangeQuizID].Qsentenses[ID].stoneid;  //prefabbuttonリストにある問題scriptableobjectに入力したstoneIDを代入。石の区別を付ける
         Debug.Log(stonedatas);
         Debug.Log(stonedatas.stonedataList);
-        Stonedata stonedata = stonedatas.stonedataList.Find(p => p.stoneID == stoneiD);
-        
-
+        Stonedata stonedata = stonedatas.stonedataList.Find(p => p.stoneID == _stoneiD);　　//stonedataListに入ったstoneIDとsenderが代入されたIDで選別されたstoneIDが一致したstonedataを作る
+                                                                                           //ID一致のstonedataに入った各データを表示するのが以下のコード
 
         Text name = GameObject.Find("Name").GetComponent<Text>();
         name.text = "●" + stonedata.Name;
 
         Text japName = GameObject.Find("JapName").GetComponent<Text>();
-        japName.text = "・和名: " + copiedButton.CopyList[ID].wameiInTips;
+        japName.text = "・和名: " + stonedata.Wamei;
 
-        Text correctfrequency = GameObject.Find("CorrectFrequency").GetComponent <Text>();
-        correctfrequency.text = "・正解数: "+ copiedButton.CopyList[ID].correctCount.ToString() + "回";
-        
         Text color = GameObject.Find("color").GetComponent<Text>();
-        color.text = "・色: " + copiedButton.CopyList[ID].colorInTips;
+        color.text = "・色: " + stonedata.color;
         
         Text productionArea = GameObject.Find("PA").GetComponent<Text>();
-        productionArea.text = "・産地: " + copiedButton.CopyList[ID].productionInTips;
+        productionArea.text = "・産地: " + stonedata.production;
         
         Text mohshardness = GameObject.Find("MohsHardness").GetComponent<Text>();
-        mohshardness.text = "・モース硬度: " + copiedButton.CopyList[ID].MHinTips.ToString();
+        mohshardness.text = "・モース硬度: " + stonedata.MH;
 
-        Text percentage = GameObject.Find("Seitouritsu").GetComponent<Text>();
-        percentage.text = "・正答率: " + copiedButton.CopyList[ID].Copiedpercentage + "%";
+
+        int _quizID = selectingChangeQuizID;
+        int _questionID = prefabButtonList[selectingChangeQuizID].Qsentenses[ID].QuestionID;
+        Director.Savedata d = saveDataAll.savedataList.Find(p => p.changequizID == _quizID && p.QuestionID == _questionID);
+        Text seitousu = GameObject.Find("Seitouritsu").GetComponent<Text>();
+        if (d == null)
+        {
+            seitousu.text = "正解数: " + 0 + "回";
+        }
+        else
+        {
+            seitousu.text = "正解数: " + d.totalcount.ToString() + "回";
+        }
     }
 }

@@ -53,10 +53,11 @@ public class Director : MonoBehaviour
     private SavedataALL savedataall = new SavedataALL();
     
     [System.Serializable]
-    public class Savedata
+    public class Savedata  //Find(p. => p ・・・)の絞り込みでなんとかならんか
     {
         public int changequizID;  //和名当てか歴史・特性か  
-        public int QuestionID;    //問題番号    
+        public int QuestionID;    //問題番号
+        public int stoneID;
         public int totalcount;    //問題毎の遭遇した回数
         public int SeikaiSu;    　//正解数
     }
@@ -159,7 +160,6 @@ public class Director : MonoBehaviour
     void Hantei(bool TimeOver)　//解答の正否を判定する
     {
         int changequizID = SettingScript.GetChangeQuiz();
-
         //Debug.Log(judge);
         if (TimeOver || Qn != bn[judge])//出題番号と、bnリストの中身が違うのであれば = 不正解の場合
         {
@@ -192,7 +192,7 @@ public class Director : MonoBehaviour
 
             }
            
-            Saveseikai(changequizID, Qn , true);
+            Saveseikai(changequizID, Qn, true);
         }
 
     }
@@ -363,7 +363,7 @@ public class Director : MonoBehaviour
 
 
 
-    public void Saveseikai(int _changequizID, int _QuestionID , bool isCorrected)
+    public void Saveseikai(int _changequizID, int _QuestionID ,bool isCorrected)
     {
         Savedata d = savedataall.savedataList.Find(p => p.changequizID == _changequizID && p.QuestionID == _QuestionID);
         if(d == null)
@@ -375,22 +375,8 @@ public class Director : MonoBehaviour
 
         if (isCorrected == true)
         {
-            d.SeikaiSu += 1;
-            questions[_changequizID].Qsentenses[_QuestionID].correctcount = d.SeikaiSu;
-            
-            int c = PlayerPrefs.GetInt(Define.KeyClearCount, 0);
-
-            if(clearCount > 0)
-            {
-                float seikaisu = questions[_changequizID].Qsentenses[_QuestionID].correctcount;
-                float s = (c / (float)seikaisu) *100;
-                string seitouritsu = s.ToString("f1");
-                questions[_changequizID].Qsentenses[_QuestionID].percentage = seitouritsu;
-
-                Debug.Log(seitouritsu);
-
-            }
-      
+            d.SeikaiSu += 1;        //正解数と回答数で個々の正答率を割り出す
+     
         }
         UnityEditor.EditorUtility.SetDirty(questions[_changequizID]);
         StreamWriter writer;

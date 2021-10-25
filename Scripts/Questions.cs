@@ -17,16 +17,8 @@ public class QS
     public string QuestionAnswer;   
     public string QuestionSentenses;
 
-    public float correctcount;
-    public string percentage;
-
     public int stoneid;
 
-    public string Name; //名前   
-    public string Wamei;　//和名    
-    public string color;//色
-    public string production;//産地
-    public string MH; //モース硬度Mohs hardness
 
 
 }
